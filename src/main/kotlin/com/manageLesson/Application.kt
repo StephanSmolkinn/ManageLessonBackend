@@ -1,21 +1,20 @@
 package com.manageLesson
 
-import com.manageLesson.features.login.configureLoginRouting
-import com.manageLesson.features.register.configureRegisterRouting
+import com.manageLesson.database.DatabaseFactory
+import com.manageLesson.repository.UserRepository
+import com.manageLesson.repository.UserRepositoryImpl
+import com.manageLesson.routes.authRoutes
+import com.manageLesson.routes.loginRoutes
+import com.manageLesson.security.configureSecurity
+import com.manageLesson.service.UserService
+import com.manageLesson.service.UserServiceImpl
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.plugins.contentnegotiation.*
-import org.jetbrains.exposed.sql.Database
+import org.koin.core.Koin
+import org.koin.ktor.plugin.Koin
 
 fun main() {
-
-    Database.connect(
-        url = "jdbc:postgresql://localhost:5432/manage_lesson",
-        driver = "org.postgresql.Driver",
-        user = "postgres",
-        password = "smolkin"
-    )
 
     embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
@@ -23,8 +22,11 @@ fun main() {
 }
 
 fun Application.module() {
+    initKoin()
     configureRouting()
-    configureLoginRouting()
-    configureRegisterRouting()
+    DatabaseFactory.init()
+    authRoutes()
+    loginRoutes()
+    configureSecurity()
     configureSerialization()
 }
